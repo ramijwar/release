@@ -2,13 +2,9 @@ name: Build APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "arena/01a0a6ae-release"
-  pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -65,3 +61,20 @@ jobs:
           path: tijarti-android/mobile/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Commit APK to repository
+        # Keeps a dated copy in the repo so it can be fetched directly from git.
+        continue-on-error: true
+        run: |
+          APK_NAME="Tijarti-Android-$(date +%Y%m%d).apk"
+          cp "tijarti-android/mobile/build/app/outputs/flutter-apk/app-release.apk" "$APK_NAME"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$APK_NAME"
+          if git diff --cached --quiet; then
+            echo "APK unchanged, nothing to commit."
+          else
+            git commit -m "Build Tijarti Android release APK ($(date +%Y%m%d))"
+            git push origin HEAD
+            echo "Committed $APK_NAME"
+          fi
