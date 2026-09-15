@@ -52,10 +52,16 @@ jobs:
         working-directory: tijarti-android/mobile
         run: flutter build apk --release
 
+      - name: Locate built APK
+        run: |
+          find tijarti-android -name "*.apk" -type f
+          echo "---- outputs dir ----"
+          ls -lh tijarti-android/mobile/build/app/outputs/flutter-apk/ 2>/dev/null || true
+
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
           name: tijarti-mobile-release-apk
-          path: tijarti-android/build/app/outputs/flutter-apk/*.apk
+          path: tijarti-android/mobile/build/app/outputs/flutter-apk/*.apk
           if-no-files-found: error
           retention-days: 30
