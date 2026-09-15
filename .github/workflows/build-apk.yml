@@ -2,6 +2,9 @@ name: Build APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "arena/01a0a6ae-release"
 
 permissions:
   contents: write
@@ -64,6 +67,10 @@ jobs:
 
       - name: Commit APK to repository
         # Keeps a dated copy in the repo so it can be fetched directly from git.
+        # Skipped when this run was triggered by the APK commit itself (loop guard).
+        if: |
+          github.event_name == 'workflow_dispatch' ||
+          !startsWith(github.event.head_commit.message, 'Build Tijarti Android release APK')
         continue-on-error: true
         run: |
           APK_NAME="Tijarti-Android-$(date +%Y%m%d).apk"
